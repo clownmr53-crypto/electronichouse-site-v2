@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Electronic HOUSE">
+  <rect width="32" height="32" rx="7" fill="#050608"/>
+  <path fill="#3ee0ff" d="M3.6 5.4h9.6v3.2H6.9v4.2h5.4v3.1H6.9v4.3h6.3v3.2H3.6z"/>
+  <rect x="15.15" y="5.4" width="1.5" height="21.2" fill="#3ee0ff"/>
+  <path fill="#3ee0ff" d="M18.6 5.4h3.3v8.3h4.2V5.4h3.3v21.2h-3.3v-8.3h-4.2v8.3h-3.3z"/>
+</svg>
