@@ -223,7 +223,7 @@ export default {
     if (p === "/studio" || p.startsWith("/studio/")) return studio(req, env, url, p);
     if (p.startsWith("/tt/m/") && (req.method === "GET" || req.method === "HEAD")) return ttMedia(req, env, p);
     if (p.startsWith("/ig/k/") && (req.method === "GET" || req.method === "HEAD")) return igMedia(req, env, p);
-    if (p.startsWith("/img/") || p.startsWith("/feeds/")) return env.CATALOG.fetch(req);
+    if ((p.startsWith("/img/") && !p.startsWith("/img/shop/")) || p.startsWith("/feeds/")) return env.CATALOG.fetch(req);
     if (p.startsWith("/api/")) return json({ ok: false, error: "not_found" }, 404);
     const res = await env.ASSETS.fetch(req);
     if (res.status === 404) return notFound(env, url);
