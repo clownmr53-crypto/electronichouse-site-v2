@@ -225,7 +225,16 @@ export default {
     if (p.startsWith("/ig/k/") && (req.method === "GET" || req.method === "HEAD")) return igMedia(req, env, p);
     if ((p.startsWith("/img/") && !p.startsWith("/img/shop/")) || p.startsWith("/feeds/")) return env.CATALOG.fetch(req);
     if (p.startsWith("/api/")) return json({ ok: false, error: "not_found" }, 404);
-    const res = await env.ASSETS.fetch(req);
+    let res = await env.ASSETS.fetch(req);
+    const pm = p.match(/^\/(en\/)?p\/([a-z0-9][a-z0-9-]*)\/?$/i);
+    if (pm && req.method === "GET") {
+      let isStatic = res.status === 200;
+      if (isStatic) { const body = await res.clone().text(); isStatic = body.includes(pm[2]); }
+      if (!isStatic) {
+        const tpl = await env.ASSETS.fetch(new Request(new URL(pm[1] ? "/en/p.html" : "/p.html", url)));
+        if (tpl.status === 200) res = tpl;
+      }
+    }
     if (res.status === 404) return notFound(env, url);
     if (p === "/" || p === "/index.html") return withCfg(req, env, ctx, await withGoogleMeta(env, res), p);
     return withCfg(req, env, ctx, res, p);

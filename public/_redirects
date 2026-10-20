@@ -1,0 +1,6 @@
+# Electronic HOUSE — Phase 3 : fiches produit dynamiques
+# Les URLs /p/<slug> sans fichier statique sont réécrites vers /p.html
+# (le template dynamique lit le slug et appelle l'API catalogue).
+# Les 172 fichiers statiques existants gardent la priorité (fichier exact > règle).
+/p/*  /p.html  200
+/en/p/*  /en/p.html  200
