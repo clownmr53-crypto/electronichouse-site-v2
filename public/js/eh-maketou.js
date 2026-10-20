@@ -12,10 +12,11 @@
       .then(function (d) { if (done) return; done = true; clearTimeout(t); location.href = d && d.ok && /^https:\/\//.test(d.url) ? d.url : url; })
       .catch(function () { if (!done) { done = true; clearTimeout(t); location.href = url; } });
   }
-  fetch("/maketou-links.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
-    if (!m || typeof m !== "object") return;
+  var links = null;
+  function scan() {
+    if (!links) return;
     document.querySelectorAll("[data-add-cart][data-id]").forEach(function (b) {
-      var id = b.getAttribute("data-id"), u = m[id];
+      var id = b.getAttribute("data-id"), u = links[id];
       if (!ok(u) || b.parentNode.querySelector(".btn-maketou")) return;
       var a = document.createElement("a");
       a.className = "btn btn-maketou"; a.href = u; a.rel = "noopener";
@@ -24,5 +25,23 @@
       a.addEventListener("click", function (ev) { if (ev.ctrlKey || ev.metaKey) return; ev.preventDefault(); go(id, u, a); });
       b.insertAdjacentElement("afterend", a);
     });
+  }
+  fetch("/maketou-links.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
+    if (!m || typeof m !== "object") return;
+    links = m;
+    scan();
+    /* Phase 2 (/produits dynamique) : la grille #eh-cat est remplie APRES un fetch API et
+       re-rendue a chaque filtre/pagination -> le scan unique arrivait avant les cartes et
+       elles n'avaient jamais le bouton. On observe donc le DOM et on re-scanne (debounce
+       200 ms) apres chaque mutation. scan() reste idempotent grace a la garde existante
+       (parent contient deja .btn-maketou) : aucun doublon possible. */
+    if (window.MutationObserver && document.body) {
+      var pending = null;
+      var obs = new MutationObserver(function () {
+        clearTimeout(pending);
+        pending = setTimeout(scan, 200);
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
+    }
   }).catch(function () {});
 })();
