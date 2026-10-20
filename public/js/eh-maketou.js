@@ -1,0 +1,28 @@
+/* Electronic HOUSE x Maketou: "Acheter sur Maketou" only for mapped products.
+   Click -> eh-maketou worker creates order + Maketou checkout -> redirect; fallback = plain Maketou product page. */
+(function () {
+  var API = "https://eh-maketou.domingohoreb.workers.dev/maketou/checkout";
+  var EN = (document.documentElement.lang || "").indexOf("en") === 0;
+  function ok(u) { return /^https:\/\/electronic-house\.mymaketou\.shop\//.test(u || ""); }
+  function go(id, url, a) {
+    a.setAttribute("aria-busy", "true"); a.textContent = EN ? "Opening payment…" : "Ouverture du paiement…";
+    var done = false, t = setTimeout(function () { if (!done) { done = true; location.href = url; } }, 8000);
+    fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ catalog_id: id }) })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { if (done) return; done = true; clearTimeout(t); location.href = d && d.ok && /^https:\/\//.test(d.url) ? d.url : url; })
+      .catch(function () { if (!done) { done = true; clearTimeout(t); location.href = url; } });
+  }
+  fetch("/maketou-links.json", { cache: "no-cache" }).then(function (r) { return r.ok ? r.json() : {}; }).then(function (m) {
+    if (!m || typeof m !== "object") return;
+    document.querySelectorAll("[data-add-cart][data-id]").forEach(function (b) {
+      var id = b.getAttribute("data-id"), u = m[id];
+      if (!ok(u) || b.parentNode.querySelector(".btn-maketou")) return;
+      var a = document.createElement("a");
+      a.className = "btn btn-maketou"; a.href = u; a.rel = "noopener";
+      a.textContent = EN ? "Buy on Maketou" : "Acheter sur Maketou";
+      a.style.cssText = "background:#ff6a00;color:#fff;margin-left:6px";
+      a.addEventListener("click", function (ev) { if (ev.ctrlKey || ev.metaKey) return; ev.preventDefault(); go(id, u, a); });
+      b.insertAdjacentElement("afterend", a);
+    });
+  }).catch(function () {});
+})();
