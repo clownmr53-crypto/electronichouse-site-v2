@@ -182,7 +182,7 @@ async function withCfg(req, env, ctx, res, p) {
   if (p === "/js/eh-config.js") { const c = await siteCfg(env); if (!c) return res; let t = await res.text(); if (c.wa_main) t = t.split('"' + ORIG.wa_main + '"').join('"' + c.wa_main + '"'); if (c.wa_second) t = t.split('"' + ORIG.wa_second + '"').join('"' + c.wa_second + '"'); const h = new Headers(res.headers); h.delete("content-length"); h.set("cache-control", "no-cache"); return new Response(t, { status: 200, headers: h }); }
   if (!ct.includes("text/html")) return res;
   const c = await siteCfg(env); logHit(req, env, ctx, "view", p.replace(/\.html$/, "") || "/");
-  const raw = await res.text(); const t = raw.includes("navigator.sendBeacon(\"/api/hit\"") ? raw : applyCfg(raw, c); // pages du dépôt déjà rendues (bannière + suivi) : pas de double injection const h = new Headers(res.headers); h.delete("content-length"); h.delete("etag"); h.set("cache-control", "no-cache");
+  const raw = await res.text(); const t = raw.includes("navigator.sendBeacon(\"/api/hit\"") ? raw : applyCfg(raw, c); /* pages du dépôt déjà rendues (bannière + suivi) : pas de double injection */ const h = new Headers(res.headers); h.delete("content-length"); h.delete("etag"); h.set("cache-control", "no-cache");
   return new Response(t, { status: 200, headers: h });
 }
 
