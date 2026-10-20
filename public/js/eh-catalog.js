@@ -10,6 +10,13 @@
   function norm(s) { return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
   var qs = new URLSearchParams(location.search);
   ["q", "marque", "etat", "sous", "prix", "tri"].forEach(function (k) { if (qs.get(k) && f.elements[k]) f.elements[k].value = qs.get(k); });
+  function match(k, v, d) { return k === "marque" ? (d.brand === v || norm(d.name).indexOf(norm(v)) >= 0) : k === "etat" ? d.etat === v : d.sub === v; }
+  // options sans aucun produit : retirées (sinon le filtre affiche 0 produit)
+  [["marque", "brand"], ["etat", "etat"], ["sous", "sub"]].forEach(function (x) {
+    var sel = f.elements[x[0]]; if (!sel) return;
+    Array.prototype.slice.call(sel.options).forEach(function (o) { if (o.value && !cards.some(function (c) { return match(x[0], o.value, c.dataset); })) o.remove(); });
+    if (x[0] === "sous") document.querySelectorAll("[data-sous]").forEach(function (b) { var v = b.getAttribute("data-sous"); if (v && !cards.some(function (c) { return match("sous", v, c.dataset); })) b.hidden = true; });
+  });
   function run(keepPage) {
     var q = norm(f.elements.q.value), m = f.elements.marque.value, e = f.elements.etat.value, s = f.elements.sous.value, pr = f.elements.prix.value, tri = f.elements.tri.value;
     var lo = 0, hi = Infinity;
@@ -17,7 +24,7 @@
     var list = cards.filter(function (c) {
       var d = c.dataset;
       if (q && norm(d.name).indexOf(q) < 0) return false;
-      if (m && d.brand !== m) return false;
+      if (m && d.brand !== m && norm(d.name).indexOf(norm(m)) < 0) return false;
       if (e && d.etat !== e) return false;
       if (s && d.sub !== s) return false;
       var p = Number(d.price); if (p < lo || p > hi) return false;
