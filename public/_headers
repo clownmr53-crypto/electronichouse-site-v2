@@ -2,3 +2,9 @@
   Content-Type: text/html; charset=utf-8
 /produits.html
   Content-Type: text/html; charset=utf-8
+/p/*
+  Content-Type: text/html; charset=utf-8
+/en/p/*
+  Content-Type: text/html; charset=utf-8
+/c/*
+  Content-Type: text/html; charset=utf-8
