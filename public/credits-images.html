@@ -45,11 +45,10 @@ window.renderBadge = function() {
   var ratingBadgeContainer = document.createElement("div");
   document.body.appendChild(ratingBadgeContainer);
   window.gapi.load('ratingbadge', function() {
-    var ratingbadge = new window.gapi.ratingbadge.RatingBadge({
-      merchantId: 5875918646,
-      position: 'BOTTOM_RIGHT'
+    window.gapi.ratingbadge.render(ratingBadgeContainer, {
+      "merchant_id": 5875918646,
+      "position": "BOTTOM_RIGHT"
     });
-    ratingbadge.render(ratingBadgeContainer);
   });
 };
 </script>
