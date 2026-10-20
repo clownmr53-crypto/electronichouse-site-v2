@@ -186,3 +186,5 @@ main,.foot,.contact-strip{position:relative;z-index:1}
 @media(min-width:900px){.bg3d .mvw{right:2vw;top:120px;width:320px;height:440px}.bg3d .soft3d{left:3vw;bottom:120px;width:80px;height:80px}}
 @media(prefers-reduced-motion:reduce){.bg3d .mvw img{animation:none}.bg3d .cube{animation:none;transform:rotateX(-18deg) rotateY(35deg)}}
 
+
+.prod{grid-template-columns:minmax(0,1fr)}@media(min-width:820px){.prod{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}.prod h1{overflow-wrap:anywhere}
