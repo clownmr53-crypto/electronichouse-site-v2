@@ -150,13 +150,16 @@
         // pagination
         if (pager) {
           var h = "";
+          var dots = false;
           if (pages > 1) {
             for (var i = 1; i <= pages; i++) {
               // Fenêtre de pagination : 1 … current-2..current+2 … last
               if (i === 1 || i === pages || Math.abs(i - currentPage) <= 2) {
                 h += '<button type="button" data-p="' + i + '"' + (i === currentPage ? ' aria-current="true"' : "") + ">" + i + "</button>";
-              } else if (h.slice(-3) !== "…") {
+                dots = false;
+              } else if (!dots) {
                 h += '<span aria-hidden="true">…</span>';
+                dots = true;
               }
             }
           }
