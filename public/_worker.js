@@ -3,6 +3,9 @@
 // Google Merchant Center / Search Console (06/10/2026) : sans redéployer, poser le jeton en KV (EH_KV) :
 //   site:google_verif_meta  = valeur(s) content="..." de la balise <meta name="google-site-verification"> (séparées par espace) -> injectée dans <head> de l'accueil
 //   site:google_verif_files = nom(s) de fichier googleXXXXXXXXXXXXXXXX.html (séparés par espace) -> servi(s) à la racine
+// /sitemap.xml     -> sitemap DYNAMIQUE Phase 6 : generee depuis l'API catalogue live
+//   (pages statiques FR + EN, fiches /p/<slug> + /en/p/<slug>, lastmod = meta catalogue,
+//    cache 1 h via Cache API, 503 si l'API est injoignable et sans cache)
 // /api/chat, /inbox*  -> worker eh-whatsapp (liaison BOT)
 // /img/*, /feeds/*    -> worker eh-catalog (liaison CATALOG)
 // /tt/m/<id>.<ext>   -> médias du miroir TikTok (KV tt:m:<id>, écrits par eh-facebook, TTL 2 j) ; préfixe vérifié chez TikTok, jamais de redirection
@@ -186,6 +189,47 @@ async function withCfg(req, env, ctx, res, p) {
   return new Response(t, { status: 200, headers: h });
 }
 
+
+// ---- Phase 6 : sitemap dynamique (catalogue live, FR + EN) ----
+const CATALOG_ORIGIN = "https://eh-catalog.domingohoreb.workers.dev";
+// Pages statiques existantes dans le depot (panier exclu : Disallow dans robots.txt).
+const SITEMAP_STATIC = ["/", "/produits", "/a-propos", "/contact", "/livraison", "/mentions-legales",
+  "/conditions-de-vente", "/politique-de-confidentialite", "/politique-des-cookies", "/retours-garantie",
+  "/credits-images", "/desinscription",
+  "/en/", "/en/produits", "/en/a-propos", "/en/contact", "/en/livraison", "/en/mentions-legales",
+  "/en/conditions-de-vente", "/en/politique-de-confidentialite", "/en/politique-des-cookies",
+  "/en/retours-garantie", "/en/credits-images", "/en/desinscription"];
+const escXml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+async function sitemap(req, env, ctx) {
+  const cache = caches.default;
+  const key = new Request(new URL("/sitemap.xml", req.url));
+  try {
+    const hit = await cache.match(key);
+    if (hit) return hit;
+  } catch {}
+  try {
+    const meta = await (await fetch(CATALOG_ORIGIN + "/api/v1/meta")).json();
+    const total = Number(meta.count) || 0;
+    const pages = Math.max(1, Math.ceil(total / 100)); // l'API plafonne a 100 items/page
+    const slugs = [];
+    for (let pg = 1; pg <= pages; pg++) {
+      const d = await (await fetch(CATALOG_ORIGIN + "/api/v1/products?per=100&page=" + pg)).json();
+      for (const it of d.items || []) if (it.slug && /^[a-z0-9][a-z0-9-]*$/.test(it.slug)) slugs.push(it.slug);
+    }
+    const lm = String(meta.updated_at || "").slice(0, 10) || "2026-10-20";
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    const add = (loc) => { xml += "<url><loc>https://electronichouse.pages.dev" + escXml(loc) + "</loc><lastmod>" + lm + "</lastmod></url>"; };
+    for (const s of SITEMAP_STATIC) add(s);
+    for (const slug of slugs) { add("/p/" + slug); add("/en/p/" + slug); }
+    xml += "</urlset>";
+    const res = new Response(xml, { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=3600" } });
+    try { if (ctx && ctx.waitUntil) ctx.waitUntil(cache.put(key, res.clone())); } catch {}
+    return res;
+  } catch {
+    return new Response("sitemap unavailable", { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" } });
+  }
+}
+
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
@@ -195,6 +239,7 @@ export default {
     if (VERIF[p]) return new Response(VERIF[p][0], { headers: { "Content-Type": VERIF[p][1] } });
     if (/^\/google[0-9a-f]{8,32}\.html$/.test(p)) { const r = await googleVerifFile(env, p); if (r) return r; }
     if (MOVED[p]) return Response.redirect(new URL(MOVED[p] + url.search, url).toString(), 301);
+    if (p === "/sitemap.xml" && req.method === "GET") return sitemap(req, env, ctx);
     if (p === "/api/submit") return submit(req, env, url);
     if (p === "/inbox" || p.startsWith("/inbox/")) {
       const target = new URL(p + url.search, BOT_ORIGIN);

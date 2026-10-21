@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /panier
+Disallow: /en/panier
+Disallow: /api/
+Disallow: /inbox
+Sitemap: https://electronichouse.pages.dev/sitemap.xml
