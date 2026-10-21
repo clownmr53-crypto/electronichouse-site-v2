@@ -109,8 +109,8 @@
       '<h3><a href="' + esc(url) + '" title="' + esc(p.nom) + '">' + esc(p.nom) + '</a></h3>' +
       '<span class="badge">' + badge + '</span>' +
       '<p class="p">' + fmtPrice(p.prix) + '</p>' +
-      (!(Number(p.prix) > 0) ? '<a class="btn btn-cart" href="' + esc(url) + '">' + (EN ? "Ask for the price" : "Demander le prix") + '</a>' :
-      '<button type="button" class="btn btn-cart" data-add-cart data-id="' + esc(p.slug) + '" data-nom="' + esc(p.nom) + '" data-prix="' + esc(p.prix) + '" data-etat="' + badge + '" data-url="' + esc(url) + '" aria-label="Ajouter au panier : ' + esc(p.nom) + '">+ Panier</button>') +
+      (!(Number(p.prix) > 0) ? '<a class="btn btn-cart" data-ref="' + esc(p.ref) + '" href="' + esc(url) + '">' + (EN ? "Ask for the price" : "Demander le prix") + '</a>' :
+      '<button type="button" class="btn btn-cart" data-add-cart data-id="' + esc(p.slug) + '" data-ref="' + esc(p.ref) + '" data-nom="' + esc(p.nom) + '" data-prix="' + esc(p.prix) + '" data-etat="' + badge + '" data-url="' + esc(url) + '" aria-label="Ajouter au panier : ' + esc(p.nom) + '">+ Panier</button>') +
       '</article>';
   }
 

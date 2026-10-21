@@ -15,8 +15,8 @@
   var links = null;
   function scan() {
     if (!links) return;
-    document.querySelectorAll("[data-add-cart][data-id]").forEach(function (b) {
-      var id = b.getAttribute("data-id"), u = links[id];
+    document.querySelectorAll("[data-ref]").forEach(function (b) {
+      var id = b.getAttribute("data-ref") || b.getAttribute("data-id"), u = links[id];
       if (!ok(u) || b.parentNode.querySelector(".btn-maketou")) return;
       var a = document.createElement("a");
       a.className = "btn btn-maketou"; a.href = u; a.rel = "noopener";
@@ -41,7 +41,7 @@
         clearTimeout(pending);
         pending = setTimeout(scan, 200);
       });
-      obs.observe(document.body, { childList: true, subtree: true });
+      obs.observe(document.body, { childList: true, subtree: true, attributes: true });
     }
   }).catch(function () {});
 })();

@@ -94,6 +94,7 @@ gtag('config', 'GT-PHRCK9GH');
 <p class="note" style="color:#b9c8dc">Prix en FCFA. Les montants en euros et en dollars sont indicatifs. Les noms, logos et marques cités appartiennent à leurs propriétaires respectifs. Electronic HOUSE est un revendeur indépendant, non affilié à ces marques. Images non contractuelles.</p></div></footer>
 <script src="/js/eh-config.js?v=172bfd01"></script>
 <script src="/js/eh-shop.js?v=172bfd01" defer></script>
+<script src="/js/eh-maketou.js?v=172bfd01" defer></script>
 <script>
 /* Electronic HOUSE — fiche produit dynamique (Phase 3) */
 (function () {
@@ -208,6 +209,7 @@ gtag('config', 'GT-PHRCK9GH');
     /* Bouton panier (eh-shop.js gère le clic via data-add-cart) */
     var addBtn = document.getElementById("eh-p-addcart");
     addBtn.setAttribute("data-id", ref);
+    addBtn.setAttribute("data-ref", ref);
     addBtn.setAttribute("data-nom", nom);
     addBtn.setAttribute("data-prix", String(prix));
     addBtn.setAttribute("data-etat", cat);
