@@ -148,7 +148,9 @@ gtag('config', 'GT-PHRCK9GH');
     var nom = p.nom || "Produit";
     var prix = Number(p.prix_fcfa || p.prix || 0);
     var prixTxt = num(prix) + " FCFA";
-    var prixDetail = prixTxt + "<small>≈ " + num(prix / 655.957) + " € · ≈ " + num(prix / 600) + " $</small>";
+    var surDemande = !(prix > 0); /* GrokBot 21/10 : produit sans prix -> « Price on request » (décision Horeb) */
+    if (surDemande) prixTxt = "Price on request";
+    var prixDetail = surDemande ? prixTxt : prixTxt + "<small>≈ " + num(prix / 655.957) + " € · ≈ " + num(prix / 600) + " $</small>";
     var img = driveDirect(p.image) || driveDirect(p.logo) || "/photos/default.jpg";
     var cat = p.categorie || p.famille || "Produits";
     var ref = p.ref || slug;
@@ -157,7 +159,7 @@ gtag('config', 'GT-PHRCK9GH');
     /* --- SEO dynamique --- */
     var title = nom + " – Price in Benin | Electronic HOUSE";
     document.title = title;
-    var desc = nom + " at " + prixTxt + " at Electronic HOUSE. Firm price, sent by message after payment.";
+    var desc = surDemande ? nom + " at Electronic HOUSE. Price on request on WhatsApp." : nom + " at " + prixTxt + " at Electronic HOUSE. Firm price, sent by message after payment.";
     var metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute("content", desc);
     var ogTitle = document.querySelector('meta[property="og:title"]');
@@ -193,7 +195,7 @@ gtag('config', 'GT-PHRCK9GH');
     }
 
     /* Description */
-    var descText = p.description || (nom + ": product sold by Electronic HOUSE at the firm price of " + prixTxt +
+    var descText = p.description || (surDemande ? nom + ": Contact us on WhatsApp for the price." : nom + ": product sold by Electronic HOUSE at the firm price of " + prixTxt +
       ". Sent by message after receipt of Mobile Money payment.");
     document.getElementById("eh-p-desc").textContent = descText;
 
@@ -212,6 +214,7 @@ gtag('config', 'GT-PHRCK9GH');
     addBtn.setAttribute("data-url", "/p/" + slug);
 
     /* data-product sur body (compatibilité) */
+    if (surDemande) { addBtn.textContent = "Ask for the price"; addBtn.removeAttribute("data-add-cart"); addBtn.onclick = function () { var w = document.getElementById("eh-p-wa"); if (w) window.open(w.href, "_blank"); }; }
     document.body.setAttribute("data-product", JSON.stringify({ id: ref, nom: nom, price: prix }));
 
     /* Lien WhatsApp */

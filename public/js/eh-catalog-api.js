@@ -37,6 +37,8 @@
   }
   function fmtPrice(n) {
     n = Number(n) || 0;
+    /* GrokBot 21/10 : produit sans prix -> « Prix à la demande » (décision Horeb) */
+    if (!(n > 0)) return EN ? "Price on request" : "Prix à la demande";
     var fr = n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     var eur = Math.round(n / 655.957);
     var usd = Math.round(n / 600);
@@ -107,7 +109,8 @@
       '<h3><a href="' + esc(url) + '" title="' + esc(p.nom) + '">' + esc(p.nom) + '</a></h3>' +
       '<span class="badge">' + badge + '</span>' +
       '<p class="p">' + fmtPrice(p.prix) + '</p>' +
-      '<button type="button" class="btn btn-cart" data-add-cart data-id="' + esc(p.slug) + '" data-nom="' + esc(p.nom) + '" data-prix="' + esc(p.prix) + '" data-etat="' + badge + '" data-url="' + esc(url) + '" aria-label="Ajouter au panier : ' + esc(p.nom) + '">+ Panier</button>' +
+      (!(Number(p.prix) > 0) ? '<a class="btn btn-cart" href="' + esc(url) + '">' + (EN ? "Ask for the price" : "Demander le prix") + '</a>' :
+      '<button type="button" class="btn btn-cart" data-add-cart data-id="' + esc(p.slug) + '" data-nom="' + esc(p.nom) + '" data-prix="' + esc(p.prix) + '" data-etat="' + badge + '" data-url="' + esc(url) + '" aria-label="Ajouter au panier : ' + esc(p.nom) + '">+ Panier</button>') +
       '</article>';
   }
 
