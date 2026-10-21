@@ -2,8 +2,8 @@
  * Remplace eh-catalog.js (filtrage statique) par des appels API.
  * API: https://eh-catalog.domingohoreb.workers.dev/api/v1/products
  * Params supportés: q, sous, prix (min-max), tri, page, per
- * - marque -> mappé sur q (recherche)
- * - etat -> "Licence" => type=logiciel ; autres => recherche dans categorie
+ * - marque -> param dédié (dérivation côté worker : nom/categorie/famille)
+ * - etat -> param dédié (dérivation côté worker : scellé/venu/pièces/type)
  */
 (function () {
   "use strict";
@@ -66,24 +66,15 @@
     var prix = f.elements.prix.value || "";
     var tri = f.elements.tri.value || "";
 
-    // q + marque combinés
-    var terms = [];
-    if (q) terms.push(q);
-    if (marque) terms.push(marque);
-    if (terms.length) p.set("q", terms.join(" "));
+    // q libre seul ; marque et etat passent en params dédiés (API : dérivation worker)
+    if (q) p.set("q", q);
+    if (marque) p.set("marque", marque);
 
     // sous -> l'API le mappe déjà sur q/famille/categorie
     if (sous) p.set("sous", sous);
 
-    // etat -> mapping pragmatique
-    if (etat === "Licence") {
-      p.set("type", "logiciel");
-    } else if (etat) {
-      // "Neuf scellé", "Occasion importée", etc. -> recherche texte
-      var eterms = terms.slice();
-      eterms.push(etat);
-      p.set("q", eterms.join(" "));
-    }
+    // etat -> param dédié (le worker dérive l'état ; "Licence" = type logiciel)
+    if (etat) p.set("etat", etat);
 
     // prix "min-max" -> prix_min/prix_max
     if (prix) {
